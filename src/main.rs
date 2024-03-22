@@ -45,11 +45,10 @@ fn main() -> Result<(), eframe::Error> {
         viewport: egui::ViewportBuilder::default()
             .with_resizable(false)
             .with_inner_size([22.0 * 50.0, 6.0 * 50.0]),
-        vsync: true,
         ..Default::default()
     };
 
-    eframe::run_simple_native("My egui App", options, move |ctx, _frame| {
+    eframe::run_simple_native("razer-sdk-reader-rs", options, move |ctx, _frame| {
         egui::CentralPanel::default().show(ctx, |ui| {
             egui::Grid::new("colors").num_columns(22).show(ui, |ui| {
                 let colors = colors.lock().unwrap();
@@ -75,8 +74,8 @@ fn main() -> Result<(), eframe::Error> {
 
                     ui.end_row();
                 }
-                //todo: probably unnecessary
-                ctx.request_repaint();
+                //razer chroma runs at 30fps
+                ctx.request_repaint_after(std::time::Duration::from_millis(1000 / 30));
             });
         });
     })
