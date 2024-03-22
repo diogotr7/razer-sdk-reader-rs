@@ -1,5 +1,6 @@
 use crate::color_provider::ColorProvider;
 use crate::common::ChromaDevice;
+use crate::encryption::decrypt;
 use crate::utils;
 
 #[repr(C, packed)]
@@ -32,13 +33,23 @@ struct KeyboardEffect {
 }
 
 impl ColorProvider for ChromaKeyboard {
-    fn width(&self) -> u32 { 22 }
+    fn width(&self) -> u32 {
+        22
+    }
 
-    fn height(&self) -> u32 { 6 }
+    fn height(&self) -> u32 {
+        6
+    }
 
-    fn get_color(&self, x: u32, y: u32) -> u32 {
+    fn get_color(&self, i: usize) -> u32 {
         let idx = utils::to_read_index(self.write_index) as usize;
         let data = &self.data[idx];
-        return data.effect.custom1[(y * self.width() + x) as usize];
+        let effect_type = data.effect_type;
+
+        match effect_type {
+            6 => decrypt(data.effect.static_color, data.timestamp),
+            8 => decrypt(data.effect.custom2_color[i], data.timestamp),
+            _ => decrypt(data.effect.custom1[i], data.timestamp),
+        }
     }
 }

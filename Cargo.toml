@@ -4,6 +4,20 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+eframe = { features = [
+    "default",
+    "__screenshot"
+] }
+
+# For image support:
+egui_extras = {  features = ["default", "image"] }
+
+env_logger = { version = "0.11.3", default-features = false, features = [
+    "auto-color",
+    "humantime",
+] }
+rand = "0.9.0-alpha.1"
+lazy_static = "1.4.0"
 
 [dependencies.windows]
 version = "0.54.0"

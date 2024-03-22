@@ -1,40 +1,90 @@
 #![allow(dead_code)]
-
-use signaled_reader::SignaledReader;
-use crate::appdata::ChromaAppData;
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use crate::color_provider::ColorProvider;
 use crate::keyboard::ChromaKeyboard;
+use signaled_reader::SignaledReader;
+use std::sync::{Arc, Mutex};
 
+mod appdata;
 mod chroma_mutex;
 mod color_provider;
-mod utils;
 mod common;
+mod constants;
+mod encryption;
 mod keyboard;
-mod appdata;
 mod reader;
 mod signaled_reader;
-mod constants;
+mod utils;
 
-fn main() {
-    let _chroma_mutex = chroma_mutex::ChromaMutex::new();
-    let _keyboard_reader = SignaledReader::<ChromaKeyboard>::new(
+use eframe::egui;
+use eframe::egui::Rect;
+
+fn main() -> Result<(), eframe::Error> {
+    let _mutex = chroma_mutex::ChromaMutex::new();
+    let initial_colors = [0xffffffff; 6 * 22];
+    let colors = Arc::new(Mutex::new(initial_colors));
+    let arc = Arc::clone(&colors);
+    let keyboard_reader = SignaledReader::<ChromaKeyboard>::new(
         constants::KEYBOARD_FILE_NAME,
         constants::KEYBOARD_WAIT_HANDLE,
-        |keyboard| {
-            let clr = keyboard.get_color(0, 0);
-            let r = clr & 0xFF;
-            let g = (clr >> 8) & 0xFF;
-            let b = (clr >> 16) & 0xFF;
-            println!("Keyboard color: r: {}, g: {}, b: {}", r, g, b);
-        },
-    );
-    let _app_data_reader = SignaledReader::<ChromaAppData>::new(
-        constants::APP_DATA_FILE_NAME,
-        constants::APP_DATA_WAIT_HANDLE,
-        |app_data| {
-            println!("App data: {}", app_data.get_current_app_name());
-        },
+        Box::new(move |keyboard| {
+            println!("Got keyboard data");
+            let mut colors = arc.lock().unwrap();
+            for i in 0..6 * 22 {
+                colors[i] = keyboard.get_color(i);
+            }
+        }),
     );
 
-    _app_data_reader.run();
+    std::thread::spawn(move || {
+        keyboard_reader.run();
+    });
+
+    env_logger::init();
+
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default()
+            .with_resizable(false)
+            .with_inner_size([22.0 * 50.0, 6.0 * 50.0]),
+        vsync: true,
+        ..Default::default()
+    };
+
+    eframe::run_simple_native("My egui App", options, move |ctx, _frame| {
+        egui::CentralPanel::default().show(ctx, |ui| {
+            egui::Grid::new("colors").num_columns(22).show(ui, |ui| {
+                let colors = colors.lock().unwrap();
+                for i in 0..6 {
+                    for j in 0..22 {
+                        let idx = i * 22 + j;
+                        let color = colors[idx];
+
+                        //ABGR
+                        let a = (color >> 24) & 0xFF;
+                        let r = (color >> 16) & 0xFF;
+                        let g = (color >> 8) & 0xFF;
+                        let b = color & 0xFF;
+                        let clr = egui::Color32::from_rgb(
+                            (color & 0xFF) as u8,
+                            ((color >> 8) & 0xFF) as u8,
+                            ((color >> 16) & 0xFF) as u8,
+                        );
+                        ui.allocate_space(egui::Vec2::new(50.0, 50.0));
+                        ui.painter().rect_filled(
+                            Rect::from_min_size(
+                                egui::Pos2::new(j as f32 * 50.0, i as f32 * 50.0),
+                                egui::Vec2::new(50.0, 50.0),
+                            ),
+                            0.0,
+                            clr,
+                        );
+                    }
+
+                    ui.end_row();
+                }
+                //todo: probably unnecessary
+                ctx.request_repaint();
+            });
+        });
+    })
 }
