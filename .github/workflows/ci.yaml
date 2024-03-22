@@ -1,0 +1,14 @@
+on: [push]
+
+name: CI
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: cargo build --release
+      - uses: actions/upload-artifact@v2
+        with:
+          name: razer-sdk-reader-rs.exe
+          path: target/release/razer-sdk-reader-rs.exe

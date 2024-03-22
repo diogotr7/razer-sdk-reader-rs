@@ -28,7 +28,6 @@ fn main() -> Result<(), eframe::Error> {
         constants::KEYBOARD_FILE_NAME,
         constants::KEYBOARD_WAIT_HANDLE,
         Box::new(move |keyboard| {
-            println!("Got keyboard data");
             let mut colors = arc.lock().unwrap();
             for i in 0..6 * 22 {
                 colors[i] = keyboard.get_color(i);
@@ -58,12 +57,6 @@ fn main() -> Result<(), eframe::Error> {
                     for j in 0..22 {
                         let idx = i * 22 + j;
                         let color = colors[idx];
-
-                        //ABGR
-                        let a = (color >> 24) & 0xFF;
-                        let r = (color >> 16) & 0xFF;
-                        let g = (color >> 8) & 0xFF;
-                        let b = color & 0xFF;
                         let clr = egui::Color32::from_rgb(
                             (color & 0xFF) as u8,
                             ((color >> 8) & 0xFF) as u8,
