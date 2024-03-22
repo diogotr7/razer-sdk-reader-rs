@@ -1,9 +1,15 @@
 #![allow(dead_code)]
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+use std::sync::{Arc, Mutex};
+
+use eframe::egui;
+use eframe::egui::Rect;
+
+use signaled_reader::SignaledReader;
+
 use crate::color_provider::ColorProvider;
 use crate::keyboard::ChromaKeyboard;
-use signaled_reader::SignaledReader;
-use std::sync::{Arc, Mutex};
 
 mod appdata;
 mod chroma_mutex;
@@ -16,12 +22,15 @@ mod reader;
 mod signaled_reader;
 mod utils;
 
-use eframe::egui;
-use eframe::egui::Rect;
+const PIXEL: f32 = 50.0;
 
 fn main() -> Result<(), eframe::Error> {
+    const WIDTH: usize = ChromaKeyboard::WIDTH;
+    const HEIGHT: usize = ChromaKeyboard::HEIGHT;
+    const COUNT: usize = WIDTH * HEIGHT;
+
     let _mutex = chroma_mutex::ChromaMutex::new();
-    let initial_colors = [0xffffffff; 6 * 22];
+    let initial_colors = [0xffffffff; COUNT];
     let colors = Arc::new(Mutex::new(initial_colors));
     let arc = Arc::clone(&colors);
     let keyboard_reader = SignaledReader::<ChromaKeyboard>::new(
@@ -29,9 +38,7 @@ fn main() -> Result<(), eframe::Error> {
         constants::KEYBOARD_WAIT_HANDLE,
         Box::new(move |keyboard| {
             let mut colors = arc.lock().unwrap();
-            for i in 0..6 * 22 {
-                colors[i] = keyboard.get_color(i);
-            }
+            keyboard.get_colors(&mut colors[..]);
         }),
     );
 
@@ -39,33 +46,32 @@ fn main() -> Result<(), eframe::Error> {
         keyboard_reader.run();
     });
 
-    env_logger::init();
-
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_resizable(false)
-            .with_inner_size([22.0 * 50.0, 6.0 * 50.0]),
+            .with_inner_size([WIDTH as f32 * PIXEL, HEIGHT as f32 * PIXEL]),
         ..Default::default()
     };
 
     eframe::run_simple_native("razer-sdk-reader-rs", options, move |ctx, _frame| {
         egui::CentralPanel::default().show(ctx, |ui| {
-            egui::Grid::new("colors").num_columns(22).show(ui, |ui| {
+            egui::Grid::new("colors").show(ui, |ui| {
                 let colors = colors.lock().unwrap();
-                for i in 0..6 {
-                    for j in 0..22 {
-                        let idx = i * 22 + j;
+                for i in 0..HEIGHT {
+                    for j in 0..WIDTH {
+                        let idx = i * WIDTH + j;
                         let color = colors[idx];
                         let clr = egui::Color32::from_rgb(
                             (color & 0xFF) as u8,
                             ((color >> 8) & 0xFF) as u8,
                             ((color >> 16) & 0xFF) as u8,
                         );
-                        ui.allocate_space(egui::Vec2::new(50.0, 50.0));
+                        let size = egui::Vec2::new(PIXEL, PIXEL);
+                        ui.allocate_space(size);
                         ui.painter().rect_filled(
                             Rect::from_min_size(
-                                egui::Pos2::new(j as f32 * 50.0, i as f32 * 50.0),
-                                egui::Vec2::new(50.0, 50.0),
+                                egui::Pos2::new(j as f32 * PIXEL, i as f32 * PIXEL),
+                                size,
                             ),
                             0.0,
                             clr,

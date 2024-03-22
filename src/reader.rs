@@ -48,15 +48,7 @@ impl Reader {
     }
 
     pub(crate) fn read<T>(&self) -> &T {
-        let vec = unsafe {
-            std::slice::from_raw_parts(
-                self.view.address.Value as *const u8,
-                std::mem::size_of::<T>(),
-            )
-        };
-        let r = unsafe { &*(vec.as_ptr() as *const T) };
-        let _index = vec[0];
-        r
+        unsafe { &*(self.view.address.Value as *const T) }
     }
 }
 

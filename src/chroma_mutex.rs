@@ -1,10 +1,12 @@
-use crate::constants;
 use std::collections::VecDeque;
+
 use windows::core::PCSTR;
 use windows::Win32::Foundation::{CloseHandle, HANDLE};
 use windows::Win32::System::Threading::{
-    CreateEventA, CreateMutexA, OpenEventA, PulseEvent, EVENT_ALL_ACCESS,
+    CreateEventA, CreateMutexA, EVENT_ALL_ACCESS, OpenEventA, PulseEvent,
 };
+
+use crate::constants;
 
 pub struct ChromaMutex {
     mutexes: VecDeque<HANDLE>,

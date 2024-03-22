@@ -62,8 +62,14 @@ lazy_static! {
     };
 }
 
+pub fn get_key(timestamp: u64) -> u32 {
+    KEY[(timestamp % 128) as usize]
+}
+
+pub fn decrypt_with_key(color: u32, key: u32) -> u32 {
+    color ^ key | 0xFF000000
+}
+
 pub fn decrypt(color: u32, timestamp: u64) -> u32 {
-    let this_key = KEY[(timestamp % 128) as usize];
-    //xor the color with the key, and OR the alpha channel
-    color ^ this_key | 0xFF000000
+    decrypt_with_key(color, get_key(timestamp))
 }

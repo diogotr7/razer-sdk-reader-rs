@@ -1,9 +1,10 @@
-use crate::reader::Reader;
 use windows::core::PCSTR;
 use windows::Win32::Foundation::{HANDLE, WAIT_OBJECT_0};
 use windows::Win32::System::Threading::{
-    CreateEventA, OpenEventA, WaitForSingleObject, EVENT_ALL_ACCESS, INFINITE,
+    CreateEventA, EVENT_ALL_ACCESS, INFINITE, OpenEventA, WaitForSingleObject,
 };
+
+use crate::reader::Reader;
 
 pub struct SignaledReader<T> {
     reader: Reader,
