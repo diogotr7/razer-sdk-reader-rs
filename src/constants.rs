@@ -1,5 +1,5 @@
-use windows::core::PCSTR;
 use windows::core::s;
+use windows::core::PCSTR;
 
 pub const CHROMA_STRING_SIZE: usize = 260;
 

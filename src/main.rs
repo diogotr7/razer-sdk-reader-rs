@@ -1,6 +1,4 @@
-#![allow(dead_code)]
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
+#![allow(unused)]
 use std::sync::{Arc, Mutex};
 
 use eframe::egui;
@@ -10,6 +8,7 @@ use signaled_reader::SignaledReader;
 
 use crate::color_provider::ColorProvider;
 use crate::keyboard::ChromaKeyboard;
+use crate::utils::convert_color;
 
 mod appdata;
 mod chroma_mutex;
@@ -23,7 +22,6 @@ mod signaled_reader;
 mod utils;
 
 const PIXEL: f32 = 50.0;
-
 fn main() -> Result<(), eframe::Error> {
     const WIDTH: usize = ChromaKeyboard::WIDTH;
     const HEIGHT: usize = ChromaKeyboard::HEIGHT;
@@ -59,14 +57,8 @@ fn main() -> Result<(), eframe::Error> {
                 let colors = colors.lock().unwrap();
                 for i in 0..HEIGHT {
                     for j in 0..WIDTH {
-                        let idx = i * WIDTH + j;
-                        let color = colors[idx];
-                        let clr = egui::Color32::from_rgb(
-                            (color & 0xFF) as u8,
-                            ((color >> 8) & 0xFF) as u8,
-                            ((color >> 16) & 0xFF) as u8,
-                        );
                         let size = egui::Vec2::new(PIXEL, PIXEL);
+
                         ui.allocate_space(size);
                         ui.painter().rect_filled(
                             Rect::from_min_size(
@@ -74,7 +66,7 @@ fn main() -> Result<(), eframe::Error> {
                                 size,
                             ),
                             0.0,
-                            clr,
+                            convert_color(colors[i * WIDTH + j]),
                         );
                     }
 

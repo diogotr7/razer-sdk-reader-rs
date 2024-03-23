@@ -1,7 +1,7 @@
 use windows::core::PCSTR;
 use windows::Win32::Foundation::{HANDLE, WAIT_OBJECT_0};
 use windows::Win32::System::Threading::{
-    CreateEventA, EVENT_ALL_ACCESS, INFINITE, OpenEventA, WaitForSingleObject,
+    CreateEventA, OpenEventA, WaitForSingleObject, EVENT_ALL_ACCESS, INFINITE,
 };
 
 use crate::reader::Reader;
@@ -18,16 +18,10 @@ impl<T> SignaledReader<T> {
         event_name: PCSTR,
         callback: Box<dyn Fn(&T) + Send>,
     ) -> Self {
-        let mut maybe_event = unsafe { OpenEventA(EVENT_ALL_ACCESS, false, event_name) };
-
-        if maybe_event.is_err() {
-            maybe_event = unsafe { CreateEventA(None, false, false, event_name) };
-            if maybe_event.is_err() {
-                panic!("Failed to create event");
-            }
-        }
-
-        let event = maybe_event.unwrap();
+        let event = unsafe {
+            OpenEventA(EVENT_ALL_ACCESS, false, event_name)
+                .unwrap_or_else(|_| CreateEventA(None, false, false, event_name).unwrap())
+        };
 
         let reader = Reader::new::<T>(mmf_name);
 

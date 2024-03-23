@@ -19,7 +19,7 @@ pub struct Reader {
 
 impl Reader {
     pub(crate) fn new<T>(mmf_name: PCSTR) -> Self {
-        let maybe_mmf = unsafe {
+        let mmf = unsafe {
             //todo fix perms
             Memory::CreateFileMappingA(
                 None,
@@ -29,22 +29,17 @@ impl Reader {
                 std::mem::size_of::<T>() as u32,
                 mmf_name,
             )
+            .unwrap()
         };
-        if maybe_mmf.is_err() {
-            panic!("Failed to create file mapping");
-        }
-        let mmf = maybe_mmf.unwrap();
-        println!(
-            "Mapping view of file with size: {}",
-            std::mem::size_of::<T>()
-        );
+
         let view = unsafe {
             Memory::MapViewOfFile(mmf, FILE_MAP_ALL_ACCESS, 0, 0, std::mem::size_of::<T>())
         };
 
-        let view = SafeMemoryMappedViewAddress { address: view };
-
-        Reader { mmf, view }
+        Reader {
+            mmf,
+            view: SafeMemoryMappedViewAddress { address: view },
+        }
     }
 
     pub(crate) fn read<T>(&self) -> &T {

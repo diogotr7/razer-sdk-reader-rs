@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use windows::core::PCSTR;
 use windows::Win32::Foundation::{CloseHandle, HANDLE};
 use windows::Win32::System::Threading::{
-    CreateEventA, CreateMutexA, EVENT_ALL_ACCESS, OpenEventA, PulseEvent,
+    CreateEventA, CreateMutexA, OpenEventA, PulseEvent, EVENT_ALL_ACCESS,
 };
 
 use crate::constants;
@@ -37,17 +37,11 @@ impl ChromaMutex {
 
     fn pulse_event(event_name: PCSTR) {
         unsafe {
-            let mut handle = OpenEventA(EVENT_ALL_ACCESS, false, event_name);
-            if handle.is_err() {
-                handle = CreateEventA(None, false, false, event_name);
-                if handle.is_err() {
-                    panic!("Failed to create event");
-                }
-            } else {
-                let actual_handle = handle.unwrap();
-                _ = PulseEvent(actual_handle);
-                _ = CloseHandle(actual_handle);
-            }
+            let handle = OpenEventA(EVENT_ALL_ACCESS, false, event_name)
+                .unwrap_or_else(|_| CreateEventA(None, false, false, event_name).unwrap());
+
+            _ = PulseEvent(handle);
+            _ = CloseHandle(handle);
         }
     }
 }
@@ -58,7 +52,6 @@ impl Drop for ChromaMutex {
             unsafe {
                 _ = CloseHandle(mutex);
             }
-            println!("Mutex dropped");
         }
     }
 }
