@@ -36,13 +36,13 @@ impl Reader {
             Memory::MapViewOfFile(mmf, FILE_MAP_ALL_ACCESS, 0, 0, std::mem::size_of::<T>())
         };
 
-        Reader {
+        Self {
             mmf,
             view: SafeMemoryMappedViewAddress { address: view },
         }
     }
 
-    pub(crate) fn read<T>(&self) -> &T {
+    pub(crate) const fn read<T>(&self) -> &T {
         unsafe { &*(self.view.address.Value as *const T) }
     }
 }

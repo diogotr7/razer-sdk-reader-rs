@@ -32,7 +32,7 @@ impl ChromaMutex {
         });
         println!("Mutex created");
 
-        ChromaMutex { mutexes }
+        Self { mutexes }
     }
 
     fn pulse_event(event_name: PCSTR) {

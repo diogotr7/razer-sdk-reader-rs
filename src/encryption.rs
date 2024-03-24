@@ -44,18 +44,18 @@ lazy_static! {
 
         let mut key = [0; 128];
 
-        for i in 0..128 {
+        for (i, k) in key.iter_mut().enumerate() {
             let mut corrected_index = i;
             if corrected_index > 124 {
                 corrected_index -= 3;
             }
 
-            let r = orig[0 * 128 + 0 + corrected_index];
-            let g = orig[1 * 128 + 1 + corrected_index];
+            let r = orig[corrected_index];
+            let g = orig[128 + 1 + corrected_index];
             let b = orig[2 * 128 + 2 + corrected_index];
             let a = orig[3 * 128 + 3 + corrected_index];
 
-            key[i] = (r as u32) | ((g as u32) << 8) | ((b as u32) << 16) | ((a as u32) << 24);
+            *k = (r as u32) | ((g as u32) << 8) | ((b as u32) << 16) | ((a as u32) << 24);
         }
 
         key
@@ -66,7 +66,7 @@ pub fn get_key(timestamp: u64) -> u32 {
     KEY[(timestamp % 128) as usize]
 }
 
-pub fn decrypt_with_key(color: u32, key: u32) -> u32 {
+pub const fn decrypt_with_key(color: u32, key: u32) -> u32 {
     color ^ key | 0xFF000000
 }
 

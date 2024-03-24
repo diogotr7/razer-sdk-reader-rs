@@ -25,7 +25,7 @@ impl<T> SignaledReader<T> {
 
         let reader = Reader::new::<T>(mmf_name);
 
-        SignaledReader {
+        Self {
             reader,
             event,
             callback,

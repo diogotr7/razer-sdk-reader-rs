@@ -41,13 +41,11 @@ impl ColorProvider for ChromaKeyboard {
         let read_index = utils::to_read_index(self.write_index) as usize;
         let data = &self.data[read_index];
 
-        let encrypted = match data.effect_type {
-            6 => data.effect.static_color,
-            8 => data.effect.custom2_color[i],
-            _ => data.effect.custom1[i],
-        };
-
-        decrypt(encrypted, data.timestamp)
+        match data.effect_type {
+            6 => decrypt(data.effect.static_color, data.timestamp),
+            8 => decrypt(data.effect.custom2_color[i], data.timestamp),
+            _ => decrypt(data.effect.custom1[i], data.timestamp),
+        }
     }
 
     fn get_colors(&self, colors: &mut [u32]) {
@@ -63,12 +61,12 @@ impl ColorProvider for ChromaKeyboard {
             let color = decrypt_with_key(data.effect.static_color, key);
             colors.fill(color);
         } else if data.effect_type == 8 {
-            for i in 0..colors.len() {
-                colors[i] = decrypt_with_key(data.effect.custom2_color[i], key);
+            for (i, c) in colors.iter_mut().enumerate() {
+                *c = decrypt_with_key(data.effect.custom2_color[i], key);
             }
         } else {
-            for i in 0..colors.len() {
-                colors[i] = decrypt_with_key(data.effect.custom1[i], key);
+            for (i, c) in colors.iter_mut().enumerate() {
+                *c = decrypt_with_key(data.effect.custom1[i], key);
             }
         }
     }

@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 eframe = "0.26.2"
-rand = "0.9.0-alpha.1"
+rand = "0.8.5"
 lazy_static = "1.4.0"
 
 [dependencies.windows]
@@ -18,3 +18,8 @@ features = [
     "Win32_System_SystemServices",
     "Win32_System_Memory_NonVolatile",
 ]
+
+[profile.ci]
+inherits = "release"
+lto = true
+codegen-units = 1
