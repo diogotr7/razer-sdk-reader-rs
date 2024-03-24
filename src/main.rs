@@ -1,11 +1,12 @@
+#![windows_subsystem = "windows"]
 #![allow(unused)]
 use std::sync::{Arc, Mutex};
 
 use eframe::egui;
-use eframe::egui::Rect;
 
 use signaled_reader::SignaledReader;
 
+use crate::chroma_mutex::ChromaMutex;
 use crate::color_provider::ColorProvider;
 use crate::keyboard::ChromaKeyboard;
 
@@ -26,7 +27,7 @@ fn main() -> Result<(), eframe::Error> {
     const HEIGHT: usize = ChromaKeyboard::HEIGHT;
     const COUNT: usize = WIDTH * HEIGHT;
 
-    let _mutex = chroma_mutex::ChromaMutex::new();
+    let _mutex = ChromaMutex::new();
     let initial_colors = [0xffffffff; COUNT];
     let colors = Arc::new(Mutex::new(initial_colors));
     let arc = Arc::clone(&colors);
@@ -60,7 +61,7 @@ fn main() -> Result<(), eframe::Error> {
 
                         ui.allocate_space(size);
                         ui.painter().rect_filled(
-                            Rect::from_min_size(
+                            egui::Rect::from_min_size(
                                 egui::Pos2::new(j as f32 * PIXEL, i as f32 * PIXEL),
                                 size,
                             ),
