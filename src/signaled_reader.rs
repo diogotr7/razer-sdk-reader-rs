@@ -13,11 +13,7 @@ pub struct SignaledReader<T> {
 }
 
 impl<T> SignaledReader<T> {
-    pub(crate) fn new(
-        mmf_name: PCSTR,
-        event_name: PCSTR,
-        callback: Box<dyn Fn(&T) + Send>,
-    ) -> Self {
+    pub fn new(mmf_name: PCSTR, event_name: PCSTR, callback: Box<dyn Fn(&T) + Send>) -> Self {
         let event = unsafe {
             OpenEventA(EVENT_ALL_ACCESS, false, event_name)
                 .unwrap_or_else(|_| CreateEventA(None, false, false, event_name).unwrap())
@@ -32,7 +28,7 @@ impl<T> SignaledReader<T> {
         }
     }
 
-    pub(crate) fn run(&self) {
+    pub fn run(&self) {
         loop {
             let wait_result = unsafe { WaitForSingleObject(self.event, INFINITE) };
             if wait_result == WAIT_OBJECT_0 {

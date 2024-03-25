@@ -1,27 +1,16 @@
 #![windows_subsystem = "windows"]
 #![allow(unused)]
-use std::sync::{Arc, Mutex};
 
 use eframe::egui;
-
-use signaled_reader::SignaledReader;
-
-use crate::chroma_mutex::ChromaMutex;
-use crate::color_provider::ColorProvider;
-use crate::keyboard::ChromaKeyboard;
-
-mod appdata;
-mod chroma_mutex;
-mod color_provider;
-mod common;
-mod constants;
-mod encryption;
-mod keyboard;
-mod reader;
-mod signaled_reader;
-mod utils;
+use razer_sdk_reader_rs::chroma_mutex::ChromaMutex;
+use razer_sdk_reader_rs::color_provider::ColorProvider;
+use razer_sdk_reader_rs::constants;
+use razer_sdk_reader_rs::keyboard::ChromaKeyboard;
+use razer_sdk_reader_rs::signaled_reader::SignaledReader;
+use std::sync::{Arc, Mutex};
 
 const PIXEL: f32 = 50.0;
+
 fn main() -> Result<(), eframe::Error> {
     const WIDTH: usize = ChromaKeyboard::WIDTH;
     const HEIGHT: usize = ChromaKeyboard::HEIGHT;
