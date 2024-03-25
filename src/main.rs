@@ -57,7 +57,7 @@ fn main() -> Result<(), eframe::Error> {
                 for i in 0..HEIGHT {
                     for j in 0..WIDTH {
                         let size = egui::Vec2::new(PIXEL, PIXEL);
-                        let color = colors.lock().unwrap()[i * WIDTH + j];
+                        let [r, g, b, _] = u32::to_le_bytes(colors.lock().unwrap()[i * WIDTH + j]);
 
                         ui.allocate_space(size);
                         ui.painter().rect_filled(
@@ -66,12 +66,7 @@ fn main() -> Result<(), eframe::Error> {
                                 size,
                             ),
                             0.0,
-                            egui::Color32::from_rgba_premultiplied(
-                                (color & 0xFF) as u8,
-                                ((color >> 8) & 0xFF) as u8,
-                                ((color >> 16) & 0xFF) as u8,
-                                ((color >> 24) & 0xFF) as u8,
-                            ),
+                            egui::Color32::from_rgb(r, g, b),
                         );
                     }
 

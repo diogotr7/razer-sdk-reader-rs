@@ -1,7 +1,8 @@
-use lazy_static::lazy_static;
+use std::sync::OnceLock;
 
-lazy_static! {
-    static ref KEY: [u32; 128] = {
+fn key() -> &'static [u32; 128] {
+    static KEY: OnceLock<[u32; 128]> = OnceLock::new();
+    KEY.get_or_init(|| {
         let orig: [u8; 512] = [
             0x45, 0x86, 0x56, 0x02, 0x34, 0x86, 0x27, 0xF6, 0xD6, 0x16, 0x02, 0x75, 0xF6, 0x27,
             0xB6, 0x37, 0x86, 0xF6, 0x07, 0x02, 0x96, 0x37, 0x02, 0x97, 0xF6, 0x57, 0x27, 0x02,
@@ -50,20 +51,20 @@ lazy_static! {
                 corrected_index -= 3;
             }
 
-            let r = orig[corrected_index];
-            let g = orig[128 + 1 + corrected_index];
-            let b = orig[2 * 128 + 2 + corrected_index];
-            let a = orig[3 * 128 + 3 + corrected_index];
-
-            *k = (r as u32) | ((g as u32) << 8) | ((b as u32) << 16) | ((a as u32) << 24);
+            *k = u32::from_le_bytes([
+                orig[0 * 128 + 0 + corrected_index],
+                orig[1 * 128 + 1 + corrected_index],
+                orig[2 * 128 + 2 + corrected_index],
+                orig[3 * 128 + 3 + corrected_index],
+            ]);
         }
 
         key
-    };
+    })
 }
 
 pub fn get_key(timestamp: u64) -> u32 {
-    KEY[(timestamp % 128) as usize]
+    key()[(timestamp % 128) as usize]
 }
 
 pub const fn decrypt_with_key(color: u32, key: u32) -> u32 {
