@@ -2,11 +2,11 @@
 #![allow(unused)]
 
 use eframe::egui;
-use razer_sdk_reader_rs::chroma_mutex::ChromaMutex;
-use razer_sdk_reader_rs::color_provider::ColorProvider;
-use razer_sdk_reader_rs::constants;
-use razer_sdk_reader_rs::keyboard::ChromaKeyboard;
-use razer_sdk_reader_rs::signaled_reader::SignaledReader;
+use razer_sdk_reader_lib::chroma_mutex::ChromaMutex;
+use razer_sdk_reader_lib::color_provider::ColorProvider;
+use razer_sdk_reader_lib::constants;
+use razer_sdk_reader_lib::keyboard::ChromaKeyboard;
+use razer_sdk_reader_lib::signaled_reader::SignaledReader;
 use std::sync::{Arc, Mutex};
 
 const PIXEL: f32 = 50.0;

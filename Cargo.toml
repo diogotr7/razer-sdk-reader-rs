@@ -3,6 +3,13 @@ name = "razer-sdk-reader-rs"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "razer_sdk_reader_lib"
+
+[[bin]]
+name = "razer_sdk_reader_gui"
+path = "src/bin/main.rs"
+
 [dependencies]
 eframe = "0.26.2"
 
