@@ -5,4 +5,5 @@ pub trait ColorProvider {
     fn get_colors(&self, colors: &mut [u32]);
     //if we had genetic trait params,
     //restricting the array to be of size WIDTH * HEIGHT would be cool
+    //https://github.com/rust-lang/rust/issues/60551
 }
