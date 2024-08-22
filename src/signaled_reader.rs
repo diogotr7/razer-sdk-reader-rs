@@ -12,6 +12,8 @@ pub struct SignaledReader<T> {
     callback: Box<dyn Fn(&T) + Send>,
 }
 
+unsafe impl<T: Send> Send for SignaledReader<T> {}
+
 impl<T> SignaledReader<T> {
     pub fn new(mmf_name: PCSTR, event_name: PCSTR, callback: Box<dyn Fn(&T) + Send>) -> Self {
         let event = unsafe {
