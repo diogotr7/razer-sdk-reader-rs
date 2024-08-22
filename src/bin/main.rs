@@ -17,8 +17,7 @@ fn main() -> Result<(), eframe::Error> {
     const COUNT: usize = WIDTH * HEIGHT;
 
     let _mutex = ChromaMutex::new();
-    let initial_colors = [0xffffffff; COUNT];
-    let colors = Arc::new(Mutex::new(initial_colors));
+    let colors = Arc::new(Mutex::new([0xff000000; COUNT]));
     let arc = Arc::clone(&colors);
     let keyboard_reader = SignaledReader::<ChromaKeyboard>::new(
         constants::KEYBOARD_FILE_NAME,
